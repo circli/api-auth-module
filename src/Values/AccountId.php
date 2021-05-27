@@ -28,7 +28,7 @@ class AccountId implements \JsonSerializable
 		return new static(0, $accountUuid);
 	}
 
-	public static function fromDb(string|int $accountId, UuidInterface $accountUuid = null): self
+	public static function fromDb(string|int $accountId, UuidInterface $accountUuid = null): static
 	{
 		return new static((int)$accountId, $accountUuid);
 	}
