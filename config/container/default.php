@@ -1,5 +1,6 @@
 <?php declare(strict_types=1);
 
+use Circli\ApiAuth\KeyFactory;
 use Circli\ApiAuth\Middleware\ApiAuthenticationMiddleware;
 use Circli\ApiAuth\Provider\AccessKeyProvider;
 use Circli\ApiAuth\Provider\AuthProvider;
@@ -12,7 +13,6 @@ use Fig\EventDispatcher\AggregateProvider;
 use Lcobucci\JWT\Signer;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key;
-use Lcobucci\JWT\Signer\Key\InMemory;
 use Lcobucci\JWT\Validator;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -29,6 +29,7 @@ use Circli\ApiAuth\Web\Input\LoginInput;
 use Circli\ApiAuth\Web\Input\LoginInputInterface;
 use function DI\autowire;
 use function DI\decorate;
+use function DI\factory;
 use function DI\get;
 
 return [
@@ -47,10 +48,7 @@ return [
 		$accessCheckers->addVoter(new AccessKeyAccessVoter());
 		return $accessCheckers;
 	}),
-	Key::class => static function (ContainerInterface $container) {
-		$config = $container->get(Config::class);
-		return InMemory::base64Encoded($config->get('jwt.secret'));
-	},
+	Key::class => factory([KeyFactory::class, 'create']),
 	LoginInputInterface::class => autowire(LoginInput::class),
 	Signer::class => autowire(Sha256::class),
 	Validator::class => autowire(JwtValidator::class),
