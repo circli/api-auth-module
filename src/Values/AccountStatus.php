@@ -10,6 +10,6 @@ use Sunkan\Enum\EnumClass;
  */
 class AccountStatus extends EnumClass
 {
-	private const ACTIVE = 'active';
-	private const INACTIVE = 'inactive';
+	public const ACTIVE = 'active';
+	public const INACTIVE = 'inactive';
 }
