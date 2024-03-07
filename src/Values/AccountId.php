@@ -66,7 +66,7 @@ class AccountId implements \JsonSerializable
 		return $this->uuid?->getBytes() ?? '';
 	}
 
-	public function jsonSerialize()
+	public function jsonSerialize(): mixed
 	{
 		return $this->toString();
 	}

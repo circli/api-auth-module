@@ -57,7 +57,7 @@ final class TokenAccount implements \JsonSerializable, AuthObject, ClaimsProvide
 	/**
 	 * @inheritDoc
 	 */
-	public function jsonSerialize()
+	public function jsonSerialize(): mixed
 	{
 		return $this->account;
 	}
