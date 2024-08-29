@@ -38,6 +38,7 @@ final class ModuleRouteAccessVoter implements VoterInterface
 		if (!$accessRequestEvent instanceof RouteAccessRequest) {
 			return;
 		}
+		/** @var object $handler */
 		$handler = $accessRequestEvent->getRoute()->getHandler();
 		$parts = explode('\\', get_class($handler));
 		$moduleNs = implode('\\', array_slice($parts, 0, count($parts) - 3));

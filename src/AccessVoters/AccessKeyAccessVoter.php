@@ -60,6 +60,7 @@ final class AccessKeyAccessVoter implements VoterInterface
 
 	private function moduleNeedAccessKey(RouteAccessRequest $accessRequestEvent): bool
 	{
+		/** @var object $handler */
 		$handler = $accessRequestEvent->getRoute()->getHandler();
 		$parts = explode('\\', get_class($handler));
 		$moduleNs = implode('\\', array_slice($parts, 0, count($parts) - 3));
