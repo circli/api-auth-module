@@ -46,7 +46,7 @@ final class JwtHandler
 
 	public function createBearerToken(ClaimsProviderInterface $claims, \DateInterval|null $expire = null): Token
 	{
-		$now = new DateTimeImmutable();
+		$now = $this->clock->now();
 		$builder = new Builder(new JoseEncoder(), ChainedFormatter::default());
 		$builder->issuedBy($this->issuer->getHost());
 		$builder->issuedAt($now);
@@ -73,7 +73,7 @@ final class JwtHandler
 
 	public function createQueryAccessToken(string $location, Token $bearerToken): Token
 	{
-		$now = new DateTimeImmutable();
+		$now = $this->clock->now();
 		$builder = new Builder(new JoseEncoder(), ChainedFormatter::default());
 		foreach ($bearerToken->claims()->all() as $key => $value) {
 			try {

@@ -19,7 +19,6 @@ final class JwtValidator implements \Lcobucci\JWT\Validator
 		private Validator $validator,
 		Issuer $issuer,
 		ClockInterface $clock,
-
 	) {
 		$this->constraints = [
 			new Constraint\IssuedBy($issuer->getHost()),
