@@ -3,10 +3,12 @@
 namespace Circli\ApiAuth;
 
 use Circli\ApiAuth\Entities\Issuer;
+use Lcobucci\Clock\FrozenClock;
 use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\Validation\Constraint;
 use Lcobucci\JWT\Validation\Validator;
+use Psr\Clock\ClockInterface;
 
 final class JwtValidator implements \Lcobucci\JWT\Validator
 {
@@ -15,11 +17,13 @@ final class JwtValidator implements \Lcobucci\JWT\Validator
 
 	public function __construct(
 		private Validator $validator,
-		Issuer $issuer
+		Issuer $issuer,
+		ClockInterface $clock,
+
 	) {
 		$this->constraints = [
 			new Constraint\IssuedBy($issuer->getHost()),
-			new Constraint\LooseValidAt(new SystemClock(new \DateTimeZone('UTC'))),
+			new Constraint\LooseValidAt(new FrozenClock($clock->now())),
 		];
 	}
 

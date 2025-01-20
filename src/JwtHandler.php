@@ -17,6 +17,7 @@ use Lcobucci\JWT\Token\Plain as Token;
 use Lcobucci\JWT\Token\RegisteredClaimGiven;
 use Lcobucci\JWT\Validation\Constraint\SignedWith;
 use Lcobucci\JWT\Validator;
+use Psr\Clock\ClockInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -34,7 +35,7 @@ final class JwtHandler
 		private Issuer $issuer,
 		private Signer $signer,
 		private Validator $validator,
-	) {}
+		private ClockInterface $clock,
 
 	public function addFallbackKey(Key $fallbackKey): void
 	{
@@ -96,7 +97,7 @@ final class JwtHandler
 			throw InvalidToken::type();
 		}
 
-		if ($jwtToken->isExpired(new DateTimeImmutable())) {
+		if ($jwtToken->isExpired($this->clock->now())) {
 			throw new ExpiredToken();
 		}
 

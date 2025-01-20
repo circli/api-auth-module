@@ -1,6 +1,8 @@
 <?php declare(strict_types=1);
 
+use Circli\ApiAuth\Entities\Issuer;
 use Circli\ApiAuth\KeyFactory;
+use Circli\ApiAuth\KeyProvider;
 use Circli\ApiAuth\Middleware\ApiAuthenticationMiddleware;
 use Circli\ApiAuth\Provider\AccessKeyProvider;
 use Circli\ApiAuth\Provider\AuthProvider;
@@ -14,6 +16,7 @@ use Lcobucci\JWT\Signer;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
 use Lcobucci\JWT\Signer\Key;
 use Lcobucci\JWT\Validator;
+use Psr\Clock\ClockInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 use Circli\ApiAuth\AccessDenied\Action;
@@ -52,7 +55,24 @@ return [
 	LoginInputInterface::class => autowire(LoginInput::class),
 	Signer::class => autowire(Sha256::class),
 	Validator::class => autowire(JwtValidator::class),
-	JwtHandler::class => autowire(JwtHandler::class),
+	JwtHandler::class => function (ContainerInterface $container) {
+		if ($container->has(KeyProvider::class)) {
+			$keys = $container->get(KeyProvider::class)->getKeys();
+		}
+		else {
+			$keys = [
+				$container->get(Key::class),
+			];
+		}
+
+		return new JwtHandler(
+			$keys,
+			$container->get(Issuer::class),
+			$container->get(Signer::class),
+			$container->get(Validator::class),
+			$container->get(ClockInterface::class),
+		);
+	},
 	AuthProvider::class => autowire(ApiAuthProvider::class)->constructor(
 		get(AccessKeyProvider::class),
 		get(AccountAuthProvider::class),
