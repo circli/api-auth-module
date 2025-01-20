@@ -57,12 +57,10 @@ return [
 	Validator::class => autowire(JwtValidator::class),
 	JwtHandler::class => function (ContainerInterface $container) {
 		if ($container->has(KeyProvider::class)) {
-			$keys = $container->get(KeyProvider::class)->getKeys();
+			$keys = $container->get(KeyProvider::class);
 		}
 		else {
-			$keys = [
-				$container->get(Key::class),
-			];
+			$keys = $container->get(Key::class);
 		}
 
 		return new JwtHandler(
@@ -71,6 +69,7 @@ return [
 			$container->get(Signer::class),
 			$container->get(Validator::class),
 			$container->get(ClockInterface::class),
+			$container->get(LoggerInterface::class),
 		);
 	},
 	AuthProvider::class => autowire(ApiAuthProvider::class)->constructor(

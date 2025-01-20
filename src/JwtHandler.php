@@ -20,26 +20,28 @@ use Lcobucci\JWT\Validator;
 use Psr\Clock\ClockInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Log\LoggerInterface;
 
 final class JwtHandler
 {
 	public const CLAIM_LOCATION = 'location';
 
-	/**
-	 * Key that can be added to allow key rotation
-	 */
-	private ?Key $fallbackKey = null;
+	private Key $primaryKey;
 
 	public function __construct(
-		private Key $jwtSecret,
+		private Key|KeyProvider $keys,
 		private Issuer $issuer,
 		private Signer $signer,
 		private Validator $validator,
 		private ClockInterface $clock,
-
-	public function addFallbackKey(Key $fallbackKey): void
-	{
-		$this->fallbackKey = $fallbackKey;
+		private LoggerInterface $logger,
+	) {
+		if ($this->keys instanceof Key) {
+			$this->primaryKey = $this->keys;
+		}
+		else {
+			$this->primaryKey = $this->keys->getPrimaryKey();
+		}
 	}
 
 	public function createBearerToken(ClaimsProviderInterface $claims, \DateInterval|null $expire = null): Token
@@ -54,7 +56,7 @@ final class JwtHandler
 		foreach ($claims->getClaims() as $key => $value) {
 			$builder->withClaim($key, $value);
 		}
-		return $builder->getToken($this->signer, $this->jwtSecret);
+		return $builder->getToken($this->signer, $this->primaryKey);
 	}
 
 	public function createQueryAccessTokenFromRequest(string $location, RequestInterface $request): Token
@@ -85,7 +87,7 @@ final class JwtHandler
 		$builder->expiresAt($now->add(new \DateInterval('PT5M')));
 		$builder->withClaim(self::CLAIM_LOCATION, $location);
 
-		return $builder->getToken($this->signer, $this->jwtSecret);
+		return $builder->getToken($this->signer, $this->primaryKey);
 	}
 
 	public function verifyRequest(ServerRequestInterface $request): Token
@@ -101,16 +103,23 @@ final class JwtHandler
 			throw new ExpiredToken();
 		}
 
-		if (!$this->validator->validate($jwtToken, new SignedWith($this->signer, $this->jwtSecret))) {
-			if ($this->fallbackKey) {
-				if (!$this->validator->validate($jwtToken, new SignedWith($this->signer, $this->fallbackKey))) {
-					throw InvalidToken::signature();
+		$signed = new SignedWith($this->signer, $this->primaryKey);
+		if ($this->validator->validate($jwtToken, $signed)) {
+			return $jwtToken;
+		}
+
+		if ($this->keys instanceof KeyProvider) {
+			foreach ($this->keys->getKeys() as $key) {
+				$signed = new SignedWith($this->signer, $key);
+				if ($this->validator->validate($jwtToken, $signed)) {
+					$this->logger->notice('Token using old key', [
+						'token' => $jwtToken->toString(),
+					]);
+					return $jwtToken;
 				}
 			}
-			else {
-				throw InvalidToken::signature();
-			}
 		}
-		return $jwtToken;
+
+		throw InvalidToken::signature();
 	}
 }
