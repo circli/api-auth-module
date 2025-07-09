@@ -4,12 +4,13 @@ namespace Circli\ApiAuth\Values;
 
 use Circli\ApiAuth\Contracts\ClaimsProviderInterface;
 use Circli\ApiAuth\Exception\InvalidInput;
+use Lcobucci\JWT\UnencryptedToken;
 use Ramsey\Uuid\Uuid;
 use Ramsey\Uuid\UuidInterface;
 
 class AccountId implements \JsonSerializable
 {
-	public static function fromJwtToken(\Lcobucci\JWT\UnencryptedToken $token): self
+	public static function fromJwtToken(UnencryptedToken $token): self
 	{
 		if (!$token->claims()->has(ClaimsProviderInterface::ACCOUNT_ID)) {
 			throw InvalidInput::missingAccountId();
@@ -22,13 +23,13 @@ class AccountId implements \JsonSerializable
 		return new static((int)$accountId, null);
 	}
 
-	public static function new(UuidInterface $accountUuid = null): self
+	public static function new(?UuidInterface $accountUuid = null): self
 	{
 		$accountUuid = $accountUuid ?? Uuid::uuid4();
 		return new static(0, $accountUuid);
 	}
 
-	public static function fromDb(string|int $accountId, UuidInterface $accountUuid = null): static
+	public static function fromDb(string|int $accountId, ?UuidInterface $accountUuid = null): static
 	{
 		return new static((int)$accountId, $accountUuid);
 	}

@@ -24,7 +24,7 @@ final class Module implements ModuleInterface, InitHttpApplication
 	/**
 	 * @return string[]|array<string, mixed>
 	 */
-	public function configure(PathContainer $paths = null): array
+	public function configure(?PathContainer $pathContainer = null): array
 	{
 		$configFolder = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'config' . DIRECTORY_SEPARATOR . 'container';
 		return [
@@ -32,7 +32,7 @@ final class Module implements ModuleInterface, InitHttpApplication
 		];
 	}
 
-	public function initHttp(RouterCollection $router, ContainerInterface $container = null): void
+	public function initHttp(RouterCollection $router, ?ContainerInterface $container = null): void
 	{
 		$router->post('/auth/login', new AuthenticateAction());
 	}

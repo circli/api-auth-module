@@ -4,7 +4,6 @@ namespace Circli\ApiAuth;
 
 use Circli\ApiAuth\Entities\Issuer;
 use Lcobucci\Clock\FrozenClock;
-use Lcobucci\Clock\SystemClock;
 use Lcobucci\JWT\Token;
 use Lcobucci\JWT\Validation\Constraint;
 use Lcobucci\JWT\Validation\Validator;

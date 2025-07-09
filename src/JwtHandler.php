@@ -6,7 +6,6 @@ use Circli\ApiAuth\Contracts\ClaimsProviderInterface;
 use Circli\ApiAuth\Entities\Issuer;
 use Circli\ApiAuth\Exception\ExpiredToken;
 use Circli\ApiAuth\Exception\InvalidToken;
-use DateTimeImmutable;
 use Lcobucci\JWT\Encoding\ChainedFormatter;
 use Lcobucci\JWT\Encoding\JoseEncoder;
 use Lcobucci\JWT\Signer;
